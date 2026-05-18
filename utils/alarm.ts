@@ -41,7 +41,9 @@ export async function stopAlarm(): Promise<void> {
     try {
       _player.pause();
       _player.remove();
-    } catch {}
+    } catch {
+      // Ignore cleanup errors
+    }
     _player = null;
   }
 }
