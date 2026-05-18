@@ -39,7 +39,8 @@
           "sounds": ["./assets/sounds/alarm.wav"]
         }
       ],
-      "expo-audio"
+      "expo-audio",
+      "./plugins/withForegroundService"
     ],
     "experiments": {
       "typedRoutes": true,
