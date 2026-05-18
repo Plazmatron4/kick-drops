@@ -1,4 +1,5 @@
 import { Feather } from "@expo/vector-icons";
+import * as Clipboard from "expo-clipboard";
 import * as Haptics from "expo-haptics";
 import * as WebBrowser from "expo-web-browser";
 import React from "react";
@@ -9,6 +10,7 @@ import {
   Pressable,
   StyleSheet,
   Text,
+  ToastAndroid,
   View,
 } from "react-native";
 
@@ -19,23 +21,57 @@ interface Props {
   campaign: Campaign;
 }
 
+function getFirstChannelUsername(campaign: Campaign): string | null {
+  return campaign.channels?.[0]?.user?.username ?? null;
+}
+
+function getKickUrl(campaign: Campaign): string {
+  const username = getFirstChannelUsername(campaign);
+  if (username) return `https://kick.com/${username}`;
+  return "https://kick.com/drops/all-campaigns";
+}
+
+function showToast(msg: string) {
+  if (Platform.OS === "android") {
+    ToastAndroid.show(msg, ToastAndroid.SHORT);
+  }
+}
+
 export function CampaignCard({ campaign }: Props) {
   const colors = useColors();
 
   const isActive = campaign.status === "active";
   const rewardCount = campaign.rewards?.length ?? 0;
   const channelCount = campaign.channels?.length ?? 0;
+  const username = getFirstChannelUsername(campaign);
+  const kickUrl = getKickUrl(campaign);
 
   async function handleOpen() {
     if (Platform.OS !== "web") {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-    const url = campaign.connect_url || "https://kick.com/drops/all-campaigns";
     if (Platform.OS === "web") {
-      Linking.openURL(url);
+      Linking.openURL(kickUrl);
     } else {
-      await WebBrowser.openBrowserAsync(url);
+      await WebBrowser.openBrowserAsync(kickUrl);
     }
+  }
+
+  async function handleCopyUsername() {
+    if (!username) return;
+    if (Platform.OS !== "web") {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    await Clipboard.setStringAsync(username);
+    showToast("Username copied");
+  }
+
+  async function handleCopyLink() {
+    if (Platform.OS !== "web") {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    await Clipboard.setStringAsync(kickUrl);
+    showToast("Link copied");
   }
 
   return (
@@ -93,6 +129,15 @@ export function CampaignCard({ campaign }: Props) {
         </Text>
       </View>
 
+      {username ? (
+        <View style={[styles.channelRow, { backgroundColor: colors.secondary, borderRadius: colors.radius }]}>
+          <Feather name="tv" size={13} color={colors.primary} />
+          <Text style={[styles.channelText, { color: colors.foreground }]} numberOfLines={1}>
+            kick.com/{username}
+          </Text>
+        </View>
+      ) : null}
+
       <View style={styles.footer}>
         <View style={styles.metaRow}>
           {rewardCount > 0 && (
@@ -113,26 +158,52 @@ export function CampaignCard({ campaign }: Props) {
           )}
         </View>
 
-        <Pressable
-          onPress={handleOpen}
-          style={({ pressed }) => [
-            styles.openButton,
-            { backgroundColor: isActive ? colors.primary : colors.secondary },
-            pressed && { opacity: 0.7 },
-          ]}
-        >
-          <Text style={[
-            styles.openText,
-            { color: isActive ? colors.primaryForeground : colors.mutedForeground }
-          ]}>
-            Open
-          </Text>
-          <Feather
-            name="external-link"
-            size={12}
-            color={isActive ? colors.primaryForeground : colors.mutedForeground}
-          />
-        </Pressable>
+        <View style={styles.actions}>
+          {username ? (
+            <Pressable
+              onPress={handleCopyUsername}
+              style={({ pressed }) => [
+                styles.iconBtn,
+                { backgroundColor: colors.secondary },
+                pressed && { opacity: 0.6 },
+              ]}
+            >
+              <Feather name="user" size={13} color={colors.mutedForeground} />
+            </Pressable>
+          ) : null}
+
+          <Pressable
+            onPress={handleCopyLink}
+            style={({ pressed }) => [
+              styles.iconBtn,
+              { backgroundColor: colors.secondary },
+              pressed && { opacity: 0.6 },
+            ]}
+          >
+            <Feather name="copy" size={13} color={colors.mutedForeground} />
+          </Pressable>
+
+          <Pressable
+            onPress={handleOpen}
+            style={({ pressed }) => [
+              styles.openButton,
+              { backgroundColor: isActive ? colors.primary : colors.secondary },
+              pressed && { opacity: 0.7 },
+            ]}
+          >
+            <Text style={[
+              styles.openText,
+              { color: isActive ? colors.primaryForeground : colors.mutedForeground }
+            ]}>
+              View
+            </Text>
+            <Feather
+              name="external-link"
+              size={12}
+              color={isActive ? colors.primaryForeground : colors.mutedForeground}
+            />
+          </Pressable>
+        </View>
       </View>
     </View>
   );
@@ -212,11 +283,24 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    marginBottom: 12,
+    marginBottom: 10,
   },
   timeText: {
     fontSize: 12,
     fontFamily: "Inter_400Regular",
+    flex: 1,
+  },
+  channelRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    marginBottom: 12,
+  },
+  channelText: {
+    fontSize: 12,
+    fontFamily: "Inter_500Medium",
     flex: 1,
   },
   footer: {
@@ -237,6 +321,18 @@ const styles = StyleSheet.create({
   metaText: {
     fontSize: 12,
     fontFamily: "Inter_500Medium",
+  },
+  actions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  iconBtn: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: "center",
+    justifyContent: "center",
   },
   openButton: {
     flexDirection: "row",
