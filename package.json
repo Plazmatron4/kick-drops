@@ -9,6 +9,12 @@
     "serve": "node server/serve.js",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
+  "dependencies": {
+    "expo-audio": "~1.1.1",
+    "expo-clipboard": "~8.0.8",
+    "expo-document-picker": "^14.0.8",
+    "expo-notifications": "^0.32.17"
+  },
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@expo-google-fonts/inter": "^0.4.0",
@@ -34,6 +40,7 @@
     "expo-linear-gradient": "~15.0.8",
     "expo-linking": "~8.0.10",
     "expo-location": "~19.0.8",
+    "expo-modules-core": "~3.0.30",
     "expo-router": "~6.0.17",
     "expo-splash-screen": "~31.0.12",
     "expo-status-bar": "~3.0.9",
@@ -54,12 +61,5 @@
     "typescript": "~5.9.2",
     "zod": "catalog:",
     "zod-validation-error": "^3.4.0"
-  },
-  "dependencies": {
-    "expo-audio": "^55.0.14",
-    "expo-background-fetch": "^14.0.9",
-    "expo-document-picker": "^14.0.8",
-    "expo-notifications": "^0.32.17",
-    "expo-task-manager": "^14.0.9"
   }
 }
