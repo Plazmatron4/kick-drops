@@ -15,23 +15,20 @@
     },
     "ios": {
       "supportsTablet": false,
+      "bundleIdentifier": "com.wisdomwizzy.kickdrops",
       "infoPlist": {
         "UIBackgroundModes": ["fetch", "audio"]
       }
     },
     "android": {
+      "package": "com.wisdomwizzy.kickdrops",
       "backgroundColor": "#0e0e0e"
     },
     "web": {
       "favicon": "./assets/images/icon.png"
     },
     "plugins": [
-      [
-        "expo-router",
-        {
-          "origin": "https://replit.com/"
-        }
-      ],
+      ["expo-router", { "origin": "https://replit.com/" }],
       "expo-font",
       "expo-web-browser",
       [
@@ -47,6 +44,11 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "10d5df06-a08c-477a-a9be-48a622c285fb"
+      }
     }
   }
 }
